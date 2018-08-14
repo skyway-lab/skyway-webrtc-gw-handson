@@ -111,5 +111,5 @@ if __FILE__ == $0
   # この時点で初めてSkyWay Serverで承認されて正式なpeer_idとなる
   peer_info = on_open(peer_id, peer_token)
 
-  
+  sleep(100);
 end
