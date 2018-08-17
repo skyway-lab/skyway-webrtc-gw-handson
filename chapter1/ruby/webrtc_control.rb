@@ -5,20 +5,6 @@ require "socket"
 HOST = "localhost"
 PORT = 8000
 
-def parse_response(json)
-  if json.is_a?(Net::HTTPCreated)
-    JSON.parse(json.body)
-  elsif json.is_a?(Net::HTTPOK)
-    JSON.parse(json.body)
-  elsif json.is_a?(Net::HTTPAccepted)
-    JSON.parse(json.body)
-  elsif json.is_a?(String)
-    JSON.parse(json)
-  else
-    json
-  end
-end
-
 def request(method_name, uri, *args)
   response = nil
   Net::HTTP.start(HOST, PORT) { |http|
@@ -55,7 +41,7 @@ def create_peer(key, peer_id)
 end
 
 #GET http://35.200.46.204/#/1.peers/peer_event を叩きPeerイベントを取得する
-def wait_thread_for(uri, event, ended)
+def async_get_event(uri, event, &callback)
   e = nil
   thread_event = Thread.new do
     # timeoutする場合があるのでその時はやり直す
@@ -70,15 +56,15 @@ def wait_thread_for(uri, event, ended)
         e = JSON.parse(res.body)
       end
     end
-    if ended
-      ended.call(e)
+    if callback
+      callback.call(e)
     end
   end.run
   thread_event
 end
 
-def on_open(peer_id, peer_token)
-  thread_event = wait_thread_for("/peers/#{peer_id}/events?token=#{peer_token}", "OPEN", lambda { |e|
+def on_open(peer_id, peer_token, &callback)
+  async_get_event("/peers/#{peer_id}/events?token=#{peer_token}", "OPEN") {|e|
     # 以下のようなJSONが帰ってくるのでpeer_id, tokenを取得
     #{
     #   "event"=>"OPEN",
@@ -89,13 +75,15 @@ def on_open(peer_id, peer_token)
     # }
     peer_id = e["params"]["peer_id"]
     peer_token = e["params"]["token"]
-  })
-  thread_event.join
-  [peer_id, peer_token]
+    if callback
+      callback.call(peer_id, peer_token)
+    end
+  }
 end
 
 if __FILE__ == $0
   if ARGV.length != 1
+    p "please input peer id"
     exit(0)
   end
   # 自分のPeer IDは実行時引数で受け取っている
@@ -109,7 +97,9 @@ if __FILE__ == $0
   peer_token = create_peer(skyway_api_key, peer_id)
   # WebRTC GatewayがSkyWayサーバへ接続し、Peerとして認められると発火する
   # この時点で初めてSkyWay Serverで承認されて正式なpeer_idとなる
-  peer_info = on_open(peer_id, peer_token)
-
-  sleep(100);
+  th_onopen = on_open(peer_id, peer_token) {|peer_id, peer_token|
+    p peer_id
+    p peer_token
+  }
+  th_onopen.join
 end
