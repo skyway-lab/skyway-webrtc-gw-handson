@@ -63,7 +63,7 @@ def async_get_event(uri, event, &callback)
   thread_event
 end
 
-def on_open(peer_id, peer_token, &callback)
+def listen_open_event(peer_id, peer_token, &callback)
   async_get_event("/peers/#{peer_id}/events?token=#{peer_token}", "OPEN") {|e|
     # 以下のようなJSONが帰ってくるのでpeer_id, tokenを取得
     #{
@@ -97,7 +97,7 @@ if __FILE__ == $0
   peer_token = create_peer(skyway_api_key, peer_id)
   # WebRTC GatewayがSkyWayサーバへ接続し、Peerとして認められると発火する
   # この時点で初めてSkyWay Serverで承認されて正式なpeer_idとなる
-  th_onopen = on_open(peer_id, peer_token) {|peer_id, peer_token|
+  th_onopen = listen_open_event(peer_id, peer_token) {|peer_id, peer_token|
     p peer_id
     p peer_token
   }
