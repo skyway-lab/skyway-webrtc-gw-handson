@@ -51,7 +51,7 @@ window.onload = ()=> {
         });
 
         call.on('stream', (stream) => {
-            document.getElementById("remote_video").src = stream;
+            document.getElementById("remote_video").srcObject = stream;
         });
     };
 };
