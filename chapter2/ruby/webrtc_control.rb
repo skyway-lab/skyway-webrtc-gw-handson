@@ -80,7 +80,7 @@ def on_open(peer_id, peer_token)
   th_call = listen_call_event(peer_id, peer_token) {|media_connection_id|
     answer(media_connection_id, video_id)
     cmd = "gst-launch-1.0 v4l2src device=/dev/video0 ! videoconvert ! video/x-raw,width=640,height=480,format=I420 ! videoconvert ! x264enc bitrate=8000 pass=quant quantizer=25 rc-lookahead=0 sliced-threads=true speed-preset=superfast sync-lookahead=0 tune=zerolatency ! rtph264pay ! udpsink port=#{video_port} host=#{video_ip} sync=false";
-    system(cmd)
+    $pid = Process.spawn(cmd)
   }
 
   th_call.join
@@ -106,5 +106,12 @@ if __FILE__ == $0
     on_open(peer_id, peer_token)
   }
 
+  exit_flag = false
+  while !exit_flag
+    input = STDIN.readline().chomp!
+    exit_flag = input == "exit"
+  end
+
+  Process.kill(:TERM, $pid)
   th_onopen.join
 end
