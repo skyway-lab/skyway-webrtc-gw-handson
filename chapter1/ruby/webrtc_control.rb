@@ -63,6 +63,18 @@ def async_get_event(uri, event, &callback)
   thread_event
 end
 
+def close_peer(peer_id, peer_token)
+  res = request(:delete, "/peers/#{peer_id}?token=#{peer_token}")
+  if res.is_a?(Net::HTTPNoContent)
+    # 正常動作の場合NoContentが帰る
+  else
+    # 異常動作の場合は終了する
+    p res
+    exit(1)
+  end
+  p res
+end
+
 def listen_open_event(peer_id, peer_token, &callback)
   async_get_event("/peers/#{peer_id}/events?token=#{peer_token}", "OPEN") {|e|
     # 以下のようなJSONが帰ってくるのでpeer_id, tokenを取得
@@ -102,4 +114,12 @@ if __FILE__ == $0
     p peer_token
   }
   th_onopen.join
+
+  exit_flag = false
+  while !exit_flag
+    input = STDIN.readline().chomp!
+    exit_flag = input == "exit"
+  end
+
+  close_peer(peer_id, peer_token)
 end
