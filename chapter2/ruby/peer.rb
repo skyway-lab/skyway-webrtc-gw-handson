@@ -48,3 +48,14 @@ def listen_open_event(peer_id, peer_token, &callback)
     end
   }
 end
+
+def close_peer(peer_id, peer_token)
+  res = request(:delete, "/peers/#{peer_id}?token=#{peer_token}")
+  if res.is_a?(Net::HTTPNoContent)
+    # 正常動作の場合NoContentが帰る
+  else
+    # 異常動作の場合は終了する
+    p res
+    exit(1)
+  end
+end
