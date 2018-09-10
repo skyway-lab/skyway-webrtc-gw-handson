@@ -79,7 +79,7 @@ def on_open(peer_id, peer_token)
   dc_id = ""
   th_connect = listen_connect_event(peer_id, peer_token) {|data_connection_id|
     dc_id = data_connection_id
-    set_data_redirect(data_connection_id, data_id, "172.16.1.111", 10000)
+    set_data_redirect(data_connection_id, data_id, "127.0.0.1", 10000)
   }
 
   th_call.join
