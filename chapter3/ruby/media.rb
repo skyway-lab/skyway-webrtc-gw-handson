@@ -39,9 +39,9 @@ def answer(media_connection_id, video_id)
       "audioReceiveEnabled": false,
       "video_params": {
           "band_width": 1500,
-          "codec": "H264",
+          "codec": "VP8",
           "media_id": video_id,
-          "payload_type": 100,
+          "payload_type": 96,
       }
   }
   params = {

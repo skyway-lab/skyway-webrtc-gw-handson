@@ -46,8 +46,7 @@ window.onload = ()=> {
     document.getElementById("call_button").onclick = ()=>{
         const target_id = document.getElementById("target_id_box").value;
         const call = peer.call(target_id, null, {
-            videoReceiveEnabled: true,
-            videoCodec: "H264",
+            videoReceiveEnabled: true
         });
 
         call.on('stream', (stream) => {
