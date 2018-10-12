@@ -1,5 +1,3 @@
-#このファイルはChapter 1から変更はありません
-
 require "net/http"
 require "json"
 require "socket"

@@ -1,3 +1,5 @@
+#このファイルはChapter 1から変更はありません
+
 require "net/http"
 require "json"
 require "socket"
@@ -6,12 +8,14 @@ require "socket"
 def request(method_name, uri, *args)
   response = nil
   Net::HTTP.start(HOST, PORT) { |http|
+    # URLとWebRTCに投げるJSONの外、
+    # GET/POST/PUT等を行うのでメソッドの指定もできるようにする
     response = http.send(method_name, uri, *args)
   }
   response
 end
 
-#Long PollでEventを取得する
+#EVENTの取得はLong Pollで行うので、非同期で取れるようにしておく
 def async_get_event(uri, event, &callback)
   e = nil
   thread_event = Thread.new do
@@ -33,4 +37,3 @@ def async_get_event(uri, event, &callback)
   end.run
   thread_event
 end
-
